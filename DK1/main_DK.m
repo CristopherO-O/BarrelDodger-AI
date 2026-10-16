@@ -76,7 +76,7 @@ else
         [mx_bruto, my_bruto, sprite_atual_mario, mscr] = localizar_mario(img, mc);
 
         % Rastreia barris com Kalman
-        [bx, by, bvx, bvy, bpx, bpy, bfx, bfy, bid] = rastreia_barril(img, inimigos.barril, horizonte_barril);
+        [bx, by, bvx, bvy, bpx, bpy, bfx, bfy, bid] = rastreia_barril(img, inimigos.barril, horizonte_barril, mapa);
 
         % Localiza foguinho
         [fx, fy] = localizar_foguinho(img);
@@ -108,13 +108,6 @@ else
                 NQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             end
 
-            if pc_view
-                set(mario_plot, 'XData', NaN, 'YData', NaN);
-                for s = 1:MAX_SLOTS_VIS
-                    set(prev_plots(s), 'XData', NaN, 'YData', NaN);
-                end
-                set(impacto_plot, 'XData', NaN, 'YData', NaN);
-            end
             continue;
         end
 
@@ -154,14 +147,6 @@ else
                 NQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             end
 
-            % Limpa os gráficos da visão do PC
-            if pc_view
-                set(mario_plot, 'XData', NaN, 'YData', NaN);
-                for s = 1:MAX_SLOTS_VIS
-                    set(prev_plots(s), 'XData', NaN, 'YData', NaN);
-                end
-                set(impacto_plot, 'XData', NaN, 'YData', NaN);
-            end
             
             % Pula o render desse frame e recomeça o loop direto do início
             continue; 
@@ -179,6 +164,8 @@ else
             'by', by, ...
             'bpx', {bpx}, ...
             'bpy', {bpy}, ...
+            'bfx', {bfx}, ...
+            'bfy', {bfy}, ...
             'fx', fx, ...
             'fy', fy);
 
