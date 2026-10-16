@@ -9,20 +9,12 @@
 % inputs              -> vetor de entrada do NES: [start select up down left right a b]
 % Fx, Fy              -> alvo/objetivo atual escolhido (só é preenchido quando a acao escolhida é o controlador)
 %
-% CHAMADA ESPECIAL DE RESET: Qlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], [])
-% Isso avisa o Qlearn que o jogo acabou de ser resetado (morte ou vitoria),
-% sem precisar adivinhar isso pela posicao. Se ainda havia uma transicao
-% pendente na hora do reset, so pode ter sido por morte (a vitoria ja se
-% auto-limpa antes disso acontecer), entao penaliza com RECOMPENSA_MORTE.
-%
-% Ideia: o Qlearn NAO decide o jogo sozinho do zero. Ele escolhe, a cada frame,
-% entre 6 "acoes":
 %   1 = sobe
 %   2 = desce
 %   3 = esquerda
 %   4 = direita
 %   5 = pulo
-%   6 = usar o controlador_mario (a logica pronta que ja sobe escada/desvia de barril)
+%   6 = usar o controlador_mario 
 %
 % Ou seja, o Q-learning aprende QUANDO vale a pena deixar o controlador pronto
 % jogar por ele e quando vale a pena tomar uma acao "crua". Ele ganha pontos
@@ -132,7 +124,7 @@ function [inputs, Fx, Fy] = Qlearn(mx, my, sprite_atual_mario, mapa, bx, by, bvx
     end
 
     % ======================================================================
-    % Fallback: detecta um "teleporte" de posicao caso algum reset aconteca
+    % detecta um "teleporte" de posicao caso algum reset aconteca
     % sem passar pelo sinal explicito acima. Segue a mesma logica: se a
     % posicao anterior ja nao estava em zona de vitoria, so pode ter sido morte.
     % ======================================================================
