@@ -8,16 +8,32 @@ graphics_toolkit("fltk");
 
 pkg load image;
 pkg load retro_games;
+
 % =====================================================
 % variaveis de debug/config
+% =====================================================
 loop_enter = true; %se vai entrar no loop principal.                                      padrão(true)
 pc_view = true; %modo para ver como o pc está vizualizando os objetos.          padrão(false)
-auto_reset = true; %se vai reiniciar automaticamente quando o mario morrer.     padrão(true)
+auto_reset = true; %se vai reiniciar automaticamente quando o mario morrer.
 modo_ia = 'nqlearn'; %qual IA controla o Mario: 'controlador', 'nqlearn', 'qlearn' ou 'desligado'.
+
+
+% === config treino ===
+n_simulacoes = 1;  % Quantidade de simulacoes simultaneas (WIP)
+mult_vel = 1;      % Multiplicador da velocidade da simulacao (nao colocar valores muito altos, suspeito que interfere no aprendizado)
+% ======   ===   ======
+% Validacao das configuracoes.
+if n_simulacoes < 1 || n_simulacoes ~= fix(n_simulacoes)
+    error('n_simulacoes deve ser um inteiro positivo.');
+end
+if mult_vel < 1 || mult_vel ~= fix(mult_vel)
+    error('mult_vel deve ser um inteiro positivo.');
+end
 % =====================================================
 correlacao_estimada = 0.5128; %nao colocar valor menor que 0.5128(gambiarra) Vivo(de lado):0.9 ~ 1.00 Morto: 0.42 ~ 0.5128
 horizonte_barril = 30; % Horizonte de previsão dos barris
 
+% =====================================================
 % =====================================================
 % inicia jogo no momento ideal e salva esse momento
 [jogo, startpoint] = inicializar_emulador("DK.nes");
@@ -68,7 +84,7 @@ else
 
     while ishandle(fig) && get(fig, 'UserData') == true
         % ===== tick =====
-        jogo.step(2);
+        jogo.step(2*mult_vel);
         imc = jogo.get_image();
         img = rgb2gray(imc);
 
@@ -171,7 +187,7 @@ else
 
         PCView('update', view, dados_view);
 
-        pause(0.01);
+        pause(0.01 / mult_vel);
     end
 end
 
