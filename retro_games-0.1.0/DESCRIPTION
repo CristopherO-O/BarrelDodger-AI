@@ -1,0 +1,15 @@
+Name: retro_games
+Version: 0.1.0
+Date: 2025-12-19
+Author: ChatGPT + Marcos Laia
+Maintainer: Marcos Laia <marcos@example.com>
+Title: Libretro-based Emulator Access (NES/GBA/SNES/MegaDrive/SMS/GG/Atari)
+Description: Provide a thin Octave wrapper to use Libretro cores for classic consoles
+  (NES, GBA, SNES, MegaDrive, Master System, Game Gear and Atari 2600),
+  exposing a RetroGame object with methods to step the emulator, send input,
+  grab video frames and save/load full emulator state.
+Categories: Graphics;Simulation;Games
+License: GPLv3+
+Url: https://github.com/marcos-laia/retro_games
+Autoload: no
+Depends: octave (>= 7.0.0)

@@ -15,7 +15,7 @@ pkg load retro_games;
 loop_enter = true; %se vai entrar no loop principal.                                      padrão(true)
 pc_view = true; %modo para ver como o pc está vizualizando os objetos.          padrão(false)
 auto_reset = true; %se vai reiniciar automaticamente quando o mario morrer.
-modo_ia = 'nqlearn'; %qual IA controla o Mario: 'controlador', 'nqlearn', 'qlearn' ou 'desligado'.
+modo_ia = 'nqlearn'; % 'nqlearn' (versao existente) ou 'qlearn_puro' (copia independente).
 
 
 % === config treino ===
@@ -120,6 +120,10 @@ else
                 Qlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             end
 
+            if strcmp(modo_ia, 'qlearn_puro')
+                Qlearn_puro(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+            end
+
             if strcmp(modo_ia, 'nqlearn')
                 NQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             end
@@ -135,13 +139,16 @@ else
             case 'qlearn'
                 [inputs_ia, Fx, Fy] = Qlearn(mx, my, sprite_atual_mario, mapa, bx, by, bvx, bvy, bpx, bpy, fx, fy);
                 jogo.set_input(inputs_ia);
+            case 'qlearn_puro'
+                [inputs_ia, Fx, Fy] = Qlearn_puro(mx, my, sprite_atual_mario, mapa, bx, by, bvx, bvy, bpx, bpy, fx, fy);
+                jogo.set_input(inputs_ia);
             case 'nqlearn'
                 [inputs_ia, Fx, Fy] = NQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bvx, bvy, bpx, bpy, fx, fy);
                 jogo.set_input(inputs_ia);    
             case 'desligado'
                 % ninguem manda input, so fica observando (util pra debugar a visao)
             otherwise
-                error('modo_ia invalido: use ''controlador'', ''qlearn'', ''nqlearn'' ou ''desligado''.');
+                error('modo_ia invalido: use ''controlador'', ''qlearn'', ''qlearn_puro'', ''nqlearn'' ou ''desligado''.');
         end
 
         % =====================================================
@@ -158,6 +165,9 @@ else
 
             if strcmp(modo_ia, 'qlearn')
                 Qlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+            end
+            if strcmp(modo_ia, 'qlearn_puro')
+                Qlearn_puro(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             end
             if strcmp(modo_ia, 'nqlearn')
                 NQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);

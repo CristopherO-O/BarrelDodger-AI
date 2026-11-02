@@ -111,6 +111,7 @@ function [inputs, Fx, Fy] = NQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
         my_anterior            = NaN;
         pulou_anterior         = false;
         perigo_barril_anterior = 0;
+        salvar_Q(Q, ARQUIVO_TABELA);
         return;
     end
 
