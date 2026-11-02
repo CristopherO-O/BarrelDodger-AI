@@ -9,13 +9,23 @@ graphics_toolkit("fltk");
 pkg load image;
 pkg load retro_games;
 
+% =========================================
+% agentes possiveis (modo_ia)
+% =========================================
+% controlador (controle reativo) 
+% qlearn (versao antiga do Qlearn)
+% hqlearn (versao atual do Qlearn) 
+% qlearn_puro (Qlearn sem ajuda do controlador)
+% dqn (deepQLearn)
+% desligado
+% =========================================
 % =====================================================
 % variaveis de debug/config
 % =====================================================
 loop_enter = true; %se vai entrar no loop principal.                                      padrão(true)
 pc_view = true; %modo para ver como o pc está vizualizando os objetos.          padrão(false)
 auto_reset = true; %se vai reiniciar automaticamente quando o mario morrer.
-modo_ia = 'hqlearn'; % 'hqlearn' (versao existente) ou 'qlearn_puro' (copia independente).
+modo_ia = 'hqlearn';
 
 
 % === config treino ===
@@ -121,6 +131,10 @@ else
             clear controlador_mario;
             clear rastreia_barril;
 
+            if strcmp(modo_ia, 'dqn')
+                DQN(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+            end
+
             if strcmp(modo_ia, 'qlearn')
                 Qlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             end
@@ -150,10 +164,13 @@ else
             case 'hqlearn'
                 [inputs_ia, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bvx, bvy, bpx, bpy, fx, fy);
                 jogo.set_input(inputs_ia);    
+            case 'dqn'
+                [inputs_ia, Fx, Fy] = DQN(mx, my, sprite_atual_mario, mapa, bx, by, bvx, bvy, bpx, bpy, fx, fy);
+                jogo.set_input(inputs_ia);
             case 'desligado'
                 % ninguem manda input, so fica observando (util pra debugar a visao)
             otherwise
-                error('modo_ia invalido: use ''controlador'', ''qlearn'', ''qlearn_puro'', ''hqlearn'' ou ''desligado''.');
+                error('modo_ia invalido: use ''controlador'', ''qlearn'', ''qlearn_puro'', ''hqlearn'', ''dqn'' ou ''desligado''.');
         end
 
         % =====================================================
@@ -177,7 +194,10 @@ else
             if strcmp(modo_ia, 'hqlearn')
                 HQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             end
-
+            
+            if strcmp(modo_ia, 'dqn')
+                DQN(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+            end
             
             % Pula o render desse frame e recomeça o loop direto do início
             continue; 
