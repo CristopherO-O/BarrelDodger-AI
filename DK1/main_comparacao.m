@@ -9,7 +9,7 @@ pkg load image;
 pkg load retro_games;
 
 % Alterna uma tentativa completa por agente para comparar com o mesmo estado inicial.
-agentes = {'nqlearn', 'qlearn_puro'};
+agentes = {'hqlearn', 'qlearn_puro'};
 nomes = {'Q-learning com controlador', 'Q-learning puro'};
 pc_view = true;
 mult_vel = 2;
@@ -126,8 +126,8 @@ while ishandle(fig) && get(fig, 'UserData')
             else
                 disp('  causa: Mario sumiu');
             end
-            if strcmp(agente, 'nqlearn')
-                NQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+            if strcmp(agente, 'hqlearn')
+                HQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             else
                 Qlearn_puro(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             end
@@ -136,8 +136,8 @@ while ishandle(fig) && get(fig, 'UserData')
         end
 
         switch agente
-            case 'nqlearn'
-                [inputs_ia, Fx, Fy] = NQlearn(mx, my, sprite_atual_mario, mapa, ...
+            case 'hqlearn'
+                [inputs_ia, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, ...
                     bx, by, bvx, bvy, bpx, bpy, fx, fy);
             case 'qlearn_puro'
                 [inputs_ia, Fx, Fy] = Qlearn_puro(mx, my, sprite_atual_mario, mapa, ...
@@ -149,8 +149,8 @@ while ishandle(fig) && get(fig, 'UserData')
 
         if my < 30
             resultado = 'vitoria';
-            if strcmp(agente, 'nqlearn')
-                NQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+            if strcmp(agente, 'hqlearn')
+                HQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             else
                 Qlearn_puro(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             end

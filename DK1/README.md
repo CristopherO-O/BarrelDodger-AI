@@ -16,7 +16,7 @@ Emulador (frame) ─► Visão computacional ─► Filtro de Kalman ─► IA (
    - `rastreia_barril.m`: detecta e rastreia até 6 barris com Kalman, estima a velocidade e **prevê a trajetória** futura de cada um.
    - `localizar_foguinho.m`: detecta o foguinho por cor.
 4. **Decisão** (`main_DK.m` escolhe o modo em `modo_ia`):
-   - `Qlearn.m` e `NQlearn.m`: agentes existentes do projeto; `NQlearn.m` usa o `controlador_mario.m` como sugestão.
+   - `Qlearn.m` e `HQlearn.m`: agentes existentes do projeto; `HQlearn.m` usa o `controlador_mario.m` como sugestão.
    - `Qlearn_puro.m`: cópia independente que escolhe entre 8 ações usando somente a tabela Q: **sobe, desce, esquerda, direita, pulo, direita+pulo, esquerda+pulo** ou **nenhuma tecla**. Não chama o controlador.
    - `controlador_mario.m`: máquina de estados fixa (`ANDANDO` / `SUBINDO`), disponível apenas nos modos legados.
    - `desligado`: ninguém joga; útil para depurar a visão.
@@ -33,7 +33,7 @@ Emulador (frame) ─► Visão computacional ─► Filtro de Kalman ─► IA (
 | Pular à toa | −1 |
 | Ficar parado >200 frames sem subir | −2 por frame |
 
-Hiperparâmetros da cópia pura: `ALPHA=0.1`, `GAMMA=0.9`, ε-greedy com ε de 0.3 decaindo até 0.05. Sua tabela é salva em `qlearn_tabela_puro.mat` a cada 500 frames e ao terminar cada tentativa. `NQlearn` persiste em `qlearn_tabela_v2.mat`, também a cada 500 frames, em vitórias e ao terminar tentativas. Essas tabelas são os modelos aprendidos; não são pesos de uma rede neural.
+Hiperparâmetros da cópia pura: `ALPHA=0.1`, `GAMMA=0.9`, ε-greedy com ε de 0.3 decaindo até 0.05. Sua tabela é salva em `qlearn_tabela_puro.mat` a cada 500 frames e ao terminar cada tentativa. `HQlearn` persiste em `qlearn_tabela_v2.mat`, também a cada 500 frames, em vitórias e ao terminar tentativas. Essas tabelas são os modelos aprendidos; não são pesos de uma rede neural.
 
 O projeto já guarda as tabelas Q para continuar o treinamento, mas antes não registrava um resumo comparável de cada tentativa. `main_comparacao.m` alterna tentativas completas dos dois agentes no mesmo emulador, sempre começando do mesmo save state, e acrescenta os resultados a `resultados_comparacao.csv` (agente, vitória/morte, frames, altura alcançada, progresso e duração). Como usa um emulador único, eles não aparecem simultaneamente lado a lado: a janela mostra um agente por tentativa. As tabelas Q continuam separadas.
 
@@ -77,7 +77,7 @@ which load_rom
 main_DK
 ```
 
-Para comparar o agente guiado pelo controlador (`NQlearn`) com o Q-learning puro, execute:
+Para comparar o agente guiado pelo controlador (`HQlearn`) com o Q-learning puro, execute:
 
 ```octave
 main_comparacao
@@ -89,7 +89,7 @@ O comparador alterna uma tentativa de cada agente. Pressione **ESC** na janela p
 
 | Variável | Descrição | Padrão |
 |---|---|---|
-| `modo_ia` | `'nqlearn'` (versão atual), `'qlearn_puro'` (cópia independente), `'qlearn'`, `'controlador'` ou `'desligado'` | `'nqlearn'` |
+| `modo_ia` | `'hqlearn'` (versão atual), `'qlearn_puro'` (cópia independente), `'qlearn'`, `'controlador'` ou `'desligado'` | `'hqlearn'` |
 | `pc_view` | Mostra lado a lado o jogo e a "visão do computador" (plataformas, escadas, Mario, barris, trajetórias previstas, foguinho) | `true` |
 | `auto_reset` | Reinicia automaticamente quando o Mario morre | `true` |
 | `horizonte_barril` | Frames à frente para prever a trajetória dos barris | `30` |
@@ -111,7 +111,7 @@ O comparador alterna uma tentativa de cada agente. Pressione **ESC** na janela p
 | `kelman.m` | Filtro de Kalman para a posição do Mario |
 | `Qlearn.m` | IA Q-learning existente (mantida sem alteração de comportamento) |
 | `Qlearn_puro.m` | Cópia independente com Q-learning sem controlador |
-| `NQlearn.m` | Versão experimental de Q-learning guiada pelo controlador |
+| `HQlearn.m` | Versão experimental de Q-learning guiada pelo controlador |
 | `controlador_mario.m` | IA baseada em regras, usada apenas nos modos legados |
 | `mapa_dk_level1.mat`, `mc_template.mat`, `inimigos_template.mat` | Mapa e templates gerados pela varredura inicial |
 | `qlearn_tabela_puro.mat` | Tabela Q da cópia pura (persistente entre execuções) |

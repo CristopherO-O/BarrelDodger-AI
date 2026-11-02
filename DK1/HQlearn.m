@@ -20,7 +20,7 @@
 % Eu mudei a forma como o controlador do mario operava, eu tirei ele das entradas do qlearn e coloquei
 % ele pra rodar todo frame recomendando uma ação pro Qlearn, o qlearn recebe uma pequena recompensa por seguir o 
 % controlador, a recompensa decai
-function [inputs, Fx, Fy] = NQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bvx, bvy, bpx, bpy, fx, fy)
+function [inputs, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bvx, bvy, bpx, bpy, fx, fy)
     % ======================================================================
     % CONSTANTES
     % ======================================================================
