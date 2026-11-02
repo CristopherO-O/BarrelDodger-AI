@@ -12,10 +12,11 @@ pkg load retro_games;
 agentes = {'nqlearn', 'qlearn_puro'};
 nomes = {'Q-learning com controlador', 'Q-learning puro'};
 pc_view = true;
-mult_vel = 1;
+mult_vel = 2;
 correlacao_estimada = 0.5128;
 horizonte_barril = 30;
 limite_sumido = 10;
+sprite_morto = 6;   % indice do template mc{6} (mario morto)
 arquivo_resultados = 'resultados_comparacao.csv';
 
 if mult_vel < 1 || mult_vel ~= fix(mult_vel)
@@ -32,6 +33,10 @@ if exist('mapa_dk_level1.mat', 'file') && ...
     load('inimigos_template.mat');
 else
     [mapa, mc, inimigos] = varreduraInicial(jogo);
+end
+
+if numel(mc) < sprite_morto
+    warning('mc_template.mat tem apenas %d templates (sem o sprite de morte). Apague o arquivo para regenerar.', numel(mc));
 end
 
 if exist(arquivo_resultados, 'file')
@@ -88,15 +93,22 @@ while ishandle(fig) && get(fig, 'UserData')
         img = rgb2gray(imc);
 
         [mx_bruto, my_bruto, sprite_atual_mario, mscr] = localizar_mario(img, mc);
-        [bx, by, bvx, bvy, bpx, bpy, bfx, bfy] = ...
-            rastreia_barril(img, inimigos.barril, horizonte_barril, mapa);
+        [bx, by, bvx, bvy, bpx, bpy, bfx, bfy] = rastreia_barril(img, inimigos.barril, horizonte_barril, mapa);
         [fx, fy] = localizar_foguinho(img);
         [mx, my] = kelman(mx_bruto, my_bruto, mscr, false);
 
         frames_tentativa = frames_tentativa + 1;
+
+        % Sprite de morte detectado com confianca (mc{6}). O isscalar evita
+        % erro caso o localizar_mario devolva vazio quando nao acha nada.
+        mario_morto = isscalar(sprite_atual_mario) && sprite_atual_mario == sprite_morto ...
+                      && mscr > correlacao_estimada;
+
         if mscr > correlacao_estimada
             frames_sem_mario = 0;
-            if ~isnan(my)
+            % Nao conta a altura do Mario morto (a animacao de morte "pula"
+            % pra cima e inflaria o progresso).
+            if ~mario_morto && ~isnan(my)
                 if isnan(altura_inicial)
                     altura_inicial = my;
                 end
@@ -106,8 +118,14 @@ while ishandle(fig) && get(fig, 'UserData')
             frames_sem_mario = frames_sem_mario + 1;
         end
 
-        if frames_sem_mario >= limite_sumido
+        % Morte: sprite de morte (imediato) OU Mario sumiu por muitos frames (reserva)
+        if mario_morto || frames_sem_mario >= limite_sumido
             resultado = 'morte';
+            if mario_morto
+                disp('  causa: sprite de morte detectado');
+            else
+                disp('  causa: Mario sumiu');
+            end
             if strcmp(agente, 'nqlearn')
                 NQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             else
@@ -148,13 +166,17 @@ while ishandle(fig) && get(fig, 'UserData')
             'bfx', {bfx}, 'bfy', {bfy}, 'fx', fx, 'fy', fy);
         PCView('update', view, dados_view);
 
-        progresso = 0;
-        if ~isnan(altura_inicial) && ~isinf(melhor_altura)
-            progresso = max(0, altura_inicial - melhor_altura);
+        % Progresso medio so das tentativas JA concluidas (antes dividia por
+        % "tentativa", que inclui a atual e subestimava a media)
+        concluidas = tentativa - 1;
+        if concluidas > 0
+            prog_medio = progresso_total(indice_agente) / concluidas;
+        else
+            prog_medio = 0;
         end
         nome_janela = sprintf('%s | tentativa %d | vitorias %d, mortes %d | progresso medio %.1f px', ...
             nomes{indice_agente}, tentativa, vitorias(indice_agente), ...
-            mortes(indice_agente), progresso_total(indice_agente) / tentativa);
+            mortes(indice_agente), prog_medio);
         set(fig, 'Name', nome_janela);
         pause(0.01 / mult_vel);
     end

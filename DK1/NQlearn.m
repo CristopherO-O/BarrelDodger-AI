@@ -33,7 +33,7 @@ function [inputs, Fx, Fy] = NQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
     P_GUIA_MIN        = 0.1;      % chance minima (0 pra avalia so a tabela)
     P_GUIA_DECAIMENTO = 0.99997;  % por frame (~70k frames ate chegar no minimo)
     MIN_VISITAS       = 3;        % estado com menos visitas -> controlador decide
-    BONUS_IMITACAO    = 0.5;      % recompensa por concordar com o controlador (decai com a certeza)
+    BONUS_IMITACAO    = 1;      % recompensa por concordar com o controlador (decai com a certeza)
     USAR_SUGESTAO_NO_ESTADO = false;
 
     % --- Exploracao aleatoria (ajustes recompensa) ---
@@ -41,11 +41,12 @@ function [inputs, Fx, Fy] = NQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
     EPS_MIN         = 0.02;
     EPS_DECAIMENTO  = 0.99997;
 
-    PUNICAO_PULO    = -1.0;
+    PUNICAO_PULO    = -2.0;
     PUNICAO_ESTAGNACAO = -2;   % pontos perdidos por frame parado apos o limite
     LIMITE_ESTAGNACAO  = 200;  % frames permitidos sem subir antes de perder pontos
 
-    PESO_ALTURA        = 2;      % pontos por pixel subido
+    PESO_ALTURA  = 5;     % pontos por pixel subido
+    PESO_DESCIDA = 10;     % pontos perdidos por pixel descido
     RECOMPENSA_PULO    = 50.0;   % pontos por desviar de um barril que estava no caminho
     RECOMPENSA_VITORIA = 1000.0; % bonus por vencer
     RECOMPENSA_MORTE   = -100.0; % punicao por morrer
@@ -142,6 +143,11 @@ function [inputs, Fx, Fy] = NQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
         pulou_anterior         = false;
         perigo_barril_anterior = 0;
     end
+    if ~isnan(my_anterior)
+        delta_y = my_anterior - my;   % >0 subiu, <0 desceu (y menor = mais alto)
+    else
+        delta_y = 0;
+    end
     my_anterior = my;
 
     % ======================================================================
@@ -185,10 +191,15 @@ function [inputs, Fx, Fy] = NQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
             recompensa = recompensa + BONUS_IMITACAO * (p_guia / P_GUIA_INI);
         end
 
+        if delta_y > 0
+            recompensa = recompensa + delta_y * PESO_ALTURA;
+        elseif delta_y < 0
+            recompensa = recompensa + delta_y * PESO_DESCIDA;   % delta negativo -> punição
+        end
+
+        % melhor_altura agora só serve pra detectar estagnação
         if my < melhor_altura
-            ganho = melhor_altura - my;
             melhor_altura = my;
-            recompensa = recompensa + ganho * PESO_ALTURA;
             frames_sem_subir = 0;
         else
             frames_sem_subir = frames_sem_subir + 1;

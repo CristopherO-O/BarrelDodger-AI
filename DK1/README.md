@@ -70,7 +70,7 @@ which load_rom
 ## Como executar
 
 1. Abra o Octave na pasta do projeto.
-2. Coloque a ROM `DK.nes` na mesma pasta (você deve possuir uma cópia legal do jogo).
+2. Coloque a ROM `DK.nes` na mesma pasta.
 3. Execute:
 
 ```octave

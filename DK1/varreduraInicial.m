@@ -76,8 +76,8 @@ function [mapa, mc, inimigos] = varreduraInicial(jogo)
     img = rgb2gray(im);
     mc{5} = img(174:188, 197:212); %terminando escada 2
 
-    save('mc_template.mat', 'mc');
-    disp('Arquivo "mc_template.mat" gerado com sucesso!');
+    %save('mc_template.mat', 'mc');
+    %disp('Arquivo "mc_template.mat" gerado com sucesso!');
 
     jogo.step(30);
     im = jogo.get_image();
@@ -86,6 +86,14 @@ function [mapa, mc, inimigos] = varreduraInicial(jogo)
     foguinho = img(201:216, 70:83);
     inimigos.barril = barril;
     inimigos.foguinho = foguinho;
+
+    jogo.step(1300);
+    im = jogo.get_image();
+    img = rgb2gray(im);
+    mc{6} = img(173:188, 196:212); %mario morto
+
+    save('mc_template.mat', 'mc');
+    %disp('Arquivo "mc_template.mat" gerado com sucesso!');
 
     save('inimigos_template.mat', 'inimigos');
     disp('Arquivo "inimigos_template.mat" gerado com sucesso!');

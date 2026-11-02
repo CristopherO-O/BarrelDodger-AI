@@ -107,8 +107,13 @@ else
         end
 
         % ===== CONTROLE DE MORTE / RESET =====
-        if auto_reset && frames_sem_mario >= limite_sumido
-            disp('Mario sumiu/morreu! Resetando para o ponto inicial...');
+        mario_morto = (sprite_atual_mario == 6) && (mscr > correlacao_estimada);
+        if auto_reset && (mario_morto || frames_sem_mario >= limite_sumido)
+            if mario_morto
+                disp('Mario morreu (sprite de morte detectado)! Resetando para o ponto inicial...');
+            else
+                disp('Mario sumiu! Resetando para o ponto inicial...');
+            end
             jogo.set_state(startpoint);
             frames_sem_mario = 0;
 
