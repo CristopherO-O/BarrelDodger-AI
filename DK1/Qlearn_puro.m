@@ -33,6 +33,7 @@ function [inputs, Fx, Fy] = Qlearn_puro(mx, my, sprite_atual_mario, mapa, bx, by
     LIMITE_ESTAGNACAO  = 200;  % frames permitidos sem subir antes de perder pontos
 
     PESO_ALTURA        = 2;    % pontos por pixel subido
+    PESO_DESCIDA       = 10;   % pontos perdidos por pixel descido
     RECOMPENSA_PULO    = 50.0;    % pontos por desviar de um barril que estava no caminho
     RECOMPENSA_VITORIA = 1000.0;  % bonus por vencer 
     RECOMPENSA_MORTE   = -100.0;  % punicao por morrer
@@ -141,6 +142,11 @@ function [inputs, Fx, Fy] = Qlearn_puro(mx, my, sprite_atual_mario, mapa, bx, by
         pulou_anterior         = false;
         perigo_barril_anterior = 0;
     end
+    if ~isnan(my_anterior)
+        delta_y = my_anterior - my;   % >0 subiu, <0 desceu (y menor = mais alto)
+    else
+        delta_y = 0;
+    end
     my_anterior = my;
 
     % ======================================================================
@@ -159,10 +165,14 @@ function [inputs, Fx, Fy] = Qlearn_puro(mx, my, sprite_atual_mario, mapa, bx, by
     if ~isempty(estado_anterior)
         recompensa = 0;
 
+        if delta_y > 0
+            recompensa = recompensa + delta_y * PESO_ALTURA;
+        elseif delta_y < 0
+            recompensa = recompensa + delta_y * PESO_DESCIDA;
+        end
+
         if my < melhor_altura
-            ganho = melhor_altura - my;
             melhor_altura = my;
-            recompensa = recompensa + ganho * PESO_ALTURA;
             frames_sem_subir = 0; % Bateu recorde! Reseta o cronometro de estagnacao
         else
             frames_sem_subir = frames_sem_subir + 1; % Mais um frame enrolando...

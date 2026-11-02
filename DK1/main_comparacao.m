@@ -9,9 +9,8 @@ pkg load image;
 pkg load retro_games;
 
 % Alterna uma tentativa completa por agente para comparar com o mesmo estado inicial.
-agentes = {'hqlearn', 'qlearn_puro'};
-nomes = {'Q-learning com controlador', 'Q-learning puro'};
-pc_view = true;
+agentes = {'hqlearn', 'qlearn_puro', 'dqn'};
+nomes = {'Q-learning com controlador', 'Q-learning puro', 'Deep Q-learning (DQN)'};
 mult_vel = 2;
 correlacao_estimada = 0.5128;
 horizonte_barril = 30;
@@ -57,9 +56,10 @@ fig = figure('Name', 'Comparacao Q-learning');
 set(fig, 'UserData', true);
 set(fig, 'KeyPressFcn', @(obj, event) strcmp(event.Key, 'escape') && set(obj, 'UserData', false));
 
+% Exibicao simples: so a imagem do emulador, sem overlay
 jogo.set_state(startpoint);
-img_inicial = jogo.get_image();
-view = PCView('init', fig, img_inicial, mapa, pc_view);
+figure(fig);
+himg = imshow(jogo.get_image());
 
 tentativas = zeros(1, numel(agentes));
 vitorias = zeros(1, numel(agentes));
@@ -93,7 +93,7 @@ while ishandle(fig) && get(fig, 'UserData')
         img = rgb2gray(imc);
 
         [mx_bruto, my_bruto, sprite_atual_mario, mscr] = localizar_mario(img, mc);
-        [bx, by, bvx, bvy, bpx, bpy, bfx, bfy] = rastreia_barril(img, inimigos.barril, horizonte_barril, mapa);
+        [bx, by, bvx, bvy, bpx, bpy, ~, ~] = rastreia_barril(img, inimigos.barril, horizonte_barril, mapa);
         [fx, fy] = localizar_foguinho(img);
         [mx, my] = kelman(mx_bruto, my_bruto, mscr, false);
 
@@ -126,10 +126,13 @@ while ishandle(fig) && get(fig, 'UserData')
             else
                 disp('  causa: Mario sumiu');
             end
-            if strcmp(agente, 'hqlearn')
-                HQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
-            else
-                Qlearn_puro(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+            switch agente
+                case 'hqlearn'
+                    HQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+                case 'qlearn_puro'
+                    Qlearn_puro(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+                case 'dqn'
+                    DQN(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             end
             mortes(indice_agente) = mortes(indice_agente) + 1;
             break;
@@ -142,6 +145,9 @@ while ishandle(fig) && get(fig, 'UserData')
             case 'qlearn_puro'
                 [inputs_ia, Fx, Fy] = Qlearn_puro(mx, my, sprite_atual_mario, mapa, ...
                     bx, by, bvx, bvy, bpx, bpy, fx, fy);
+            case 'dqn'
+                [inputs_ia, Fx, Fy] = DQN(mx, my, sprite_atual_mario, mapa, ...
+                    bx, by, bvx, bvy, bpx, bpy, fx, fy);
             otherwise
                 error('Agente de comparacao desconhecido: %s', agente);
         end
@@ -149,22 +155,20 @@ while ishandle(fig) && get(fig, 'UserData')
 
         if my < 30
             resultado = 'vitoria';
-            if strcmp(agente, 'hqlearn')
-                HQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
-            else
-                Qlearn_puro(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+            switch agente
+                case 'hqlearn'
+                    HQlearn(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+                case 'qlearn_puro'
+                    Qlearn_puro(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
+                case 'dqn'
+                    DQN(-1, 0, 0, mapa, [], [], [], [], [], [], [], []);
             end
             vitorias(indice_agente) = vitorias(indice_agente) + 1;
             break;
         end
 
-        dados_view = struct( ...
-            'imc', imc, 'img', img, 'mx', mx, 'my', my, ...
-            'frames_sem_mario', frames_sem_mario, ...
-            'limite_sumido', limite_sumido, ...
-            'bx', bx, 'by', by, 'bpx', {bpx}, 'bpy', {bpy}, ...
-            'bfx', {bfx}, 'bfy', {bfy}, 'fx', fx, 'fy', fy);
-        PCView('update', view, dados_view);
+        % Atualiza so a imagem da tela
+        set(himg, 'CData', imc);
 
         % Progresso medio so das tentativas JA concluidas (antes dividia por
         % "tentativa", que inclui a atual e subestimava a media)
