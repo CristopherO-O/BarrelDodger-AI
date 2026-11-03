@@ -25,7 +25,7 @@ pkg load retro_games;
 loop_enter = true; %se vai entrar no loop principal.                                      padrão(true)
 pc_view = true; %modo para ver como o pc está vizualizando os objetos.          padrão(false)
 auto_reset = true; %se vai reiniciar automaticamente quando o mario morrer.
-modo_ia = 'dqn';
+modo_ia = 'hqlearn';
 
 
 % === config treino ===

@@ -35,8 +35,8 @@ function [inputs, Fx, Fy] = Qlearn_puro(mx, my, sprite_atual_mario, mapa, bx, by
     PESO_ALTURA        = 2;    % pontos por pixel subido
     PESO_DESCIDA       = 10;   % pontos perdidos por pixel descido
     RECOMPENSA_PULO    = 50.0;    % pontos por desviar de um barril que estava no caminho
-    RECOMPENSA_VITORIA = 1000.0;  % bonus por vencer 
-    RECOMPENSA_MORTE   = -100.0;  % punicao por morrer
+    RECOMPENSA_VITORIA = 1000000.0;  % bonus por vencer 
+    RECOMPENSA_MORTE   = -1000.0;  % punicao por morrer
 
     LIMITE_TELEPORTE = 40;    % px - fallback: se o Mario "pular" mais que isso, foi reset
     Y_VITORIA        = 30;    % px - abaixo disso o Mario venceu a fase

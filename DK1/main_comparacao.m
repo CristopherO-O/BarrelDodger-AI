@@ -11,7 +11,7 @@ pkg load retro_games;
 % Alterna uma tentativa completa por agente para comparar com o mesmo estado inicial.
 agentes = {'hqlearn', 'qlearn_puro', 'dqn'};
 nomes = {'Q-learning com controlador', 'Q-learning puro', 'Deep Q-learning (DQN)'};
-mult_vel = 2;
+mult_vel = 3;
 correlacao_estimada = 0.5128;
 horizonte_barril = 30;
 limite_sumido = 10;

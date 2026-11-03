@@ -9,17 +9,22 @@
 % inputs              -> vetor de entrada do NES: [start select up down left right a b]
 % Fx, Fy              -> alvo/objetivo atual do controlador (só preenchido quando o controlador guiou o frame)
 %
-% ACOES DO Q-LEARNING (todas "cruas", a tabela NAO tem mais a acao "usar controlador"):
+% ACOES DO Q-LEARNING (todas "cruas", a tabela NAO tem a acao "usar controlador"):
 %   1 = sobe          5 = pulo
 %   2 = desce         6 = direita + pulo
 %   3 = esquerda      7 = esquerda + pulo
 %   4 = direita       8 = nada
 %
-% adicionei novas ações necessar
-%
-% Eu mudei a forma como o controlador do mario operava, eu tirei ele das entradas do qlearn e coloquei
-% ele pra rodar todo frame recomendando uma ação pro Qlearn, o qlearn recebe uma pequena recompensa por seguir o 
-% controlador, a recompensa decai
+% COMO O CONTROLADOR ENTRA NO Q-LEARNING
+%   O controlador roda TODO frame e recomenda uma acao. Essa recomendacao:
+%     1) faz parte do ESTADO (o Q-learning "enxerga" o que o controlador faria);
+%     2) quando seguida, e registrada e aprendida como acao do proprio Q-learning
+%        (mesmo estado, mesma acao executada, mesma atualizacao da tabela), entao
+%        ele aprende como se a decisao tivesse sido dele;
+%     3) tem peso grande na escolha: o Q-learning so contraria o controlador
+%        quando tem experiencia suficiente no estado E a tabela mostra uma acao
+%        claramente melhor que a sugerida (MARGEM_OVERRIDE);
+%     4) rende uma recompensa de imitacao que decai devagar com o tempo.
 function [inputs, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bvx, bvy, bpx, bpy, fx, fy)
     % ======================================================================
     % CONSTANTES
@@ -28,13 +33,17 @@ function [inputs, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
     ALPHA           = 0.1;    % taxa de aprendizado
     GAMMA           = 0.9;    % desconto do futuro
 
-    % --- Guia do controlador ---
-    P_GUIA_INI        = 0.8;      % chance de seguir o controlador no comeco
-    P_GUIA_MIN        = 0.1;      % chance minima (0 pra avalia so a tabela)
-    P_GUIA_DECAIMENTO = 0.99997;  % por frame (~70k frames ate chegar no minimo)
-    MIN_VISITAS       = 3;        % estado com menos visitas -> controlador decide
-    BONUS_IMITACAO    = 1;      % recompensa por concordar com o controlador (decai com a certeza)
-    USAR_SUGESTAO_NO_ESTADO = false;
+    % --- Dependencia do controlador ---
+    P_GUIA_INI        = 0.9;      % chance de seguir o controlador no comeco
+    P_GUIA_MIN        = 0.5;      % chance minima (0 pra avaliar so a tabela)
+    P_GUIA_DECAIMENTO = 0.99999;  % por frame (~59k frames ate chegar no minimo)
+    MIN_VISITAS       = 8;        % estado com menos visitas -> controlador decide
+    BONUS_IMITACAO    = 5;        % recompensa por concordar com o controlador (decai com p_guia)
+    MARGEM_OVERRIDE   = 0.2;      % o Q so contraria o controlador se a melhor acao
+                                  % superar a sugerida por 20% do valor (relativo)
+    USAR_SUGESTAO_NO_ESTADO = true;   % o Q-learning enxerga a sugestao do controlador
+    EXECUTAR_ACAO_QUANTIZADA = true;  % executa exatamente a acao 1..8 que foi aprendida
+                                      % (false = usa a saida crua do controlador)
 
     % --- Exploracao aleatoria (ajustes recompensa) ---
     EPS_INICIAL     = 0.10;
@@ -48,8 +57,9 @@ function [inputs, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
     PESO_ALTURA  = 5;     % pontos por pixel subido
     PESO_DESCIDA = 10;     % pontos perdidos por pixel descido
     RECOMPENSA_PULO    = 50.0;   % pontos por desviar de um barril que estava no caminho
-    RECOMPENSA_VITORIA = 1000.0; % bonus por vencer
-    RECOMPENSA_MORTE   = -100.0; % punicao por morrer
+    RECOMPENSA_VITORIA = 1000000.0;  % bonus por vencer
+    RECOMPENSA_MORTE   = -1000.0;  % punicao por morrer
+
 
     LIMITE_TELEPORTE = 40;    % px - fallback: se o Mario "pular" mais que isso, foi reset
     Y_VITORIA        = 30;    % px - abaixo disso o Mario venceu a fase
@@ -64,7 +74,9 @@ function [inputs, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
     DIST_FOGUINHO_X = 20;
     DIST_FOGUINHO_Y = 12;
 
-    ARQUIVO_TABELA = 'qlearn_tabela_v2.mat';  % formato novo (8 acoes + contador de visitas)
+    % Arquivo novo: o estado agora inclui a sugestao do controlador, entao a
+    % tabela antiga (v2) tem chaves incompativeis e nao deve ser misturada.
+    ARQUIVO_TABELA = 'qlearn_tabela_v3.mat';
     SALVAR_A_CADA  = 500;     % frames
 
     % ======================================================================
@@ -151,7 +163,7 @@ function [inputs, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
     my_anterior = my;
 
     % ======================================================================
-    % O controlador roda TODO frame a saida dele vira a sugestao do frame.
+    % O controlador roda TODO frame; a saida dele vira a sugestao do frame.
     % ======================================================================
     [inputs_ctrl, Fx_ctrl, Fy_ctrl] = controlador_mario(mx, my, sprite_atual_mario, mapa, bx, by, bvx, bvy, bpx, bpy, fx, fy);
     if numel(inputs_ctrl) ~= 8
@@ -160,7 +172,9 @@ function [inputs, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
     sugestao = inputs_para_acao(inputs_ctrl);
 
     % ======================================================================
-    % Monta o estado atual (discretizado)
+    % Monta o estado atual (discretizado). A sugestao do controlador entra
+    % no estado: assim o Q-learning aprende "nessa situacao, quando o
+    % controlador sugere X, X rende tanto".
     % ======================================================================
     [escada_bin, ~] = avaliar_escada(mx, my, mapa, TOL_ALTURA_ESCADA, TOL_ALINHAMENTO);
     subindo_bin = (sprite_atual_mario == 3);
@@ -223,7 +237,9 @@ function [inputs, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
         end
 
         % ------------------------------------------------------------
-        % Atualiza a tabela Q (Q-learning classico, off-policy)
+        % Atualiza a tabela Q (Q-learning classico, off-policy).
+        % Vale para qualquer acao executada, inclusive as sugeridas pelo
+        % controlador: o Q-learning aprende como se tivesse escolhido.
         % ------------------------------------------------------------
         linha_ant = pegar_linha(Q, estado_anterior, NUM_ACOES);
         linha_atu = pegar_linha(Q, estado_atual, NUM_ACOES);
@@ -249,7 +265,8 @@ function [inputs, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
     % Escolhe a proxima acao
     %   1) estado pouco conhecido ou sorteio < p_guia -> segue o controlador
     %   2) sorteio seguinte < eps                     -> aleatoria
-    %   3) senao                                      -> greedy na tabela
+    %   3) senao greedy na tabela, MAS so contraria o controlador se a
+    %      melhor acao superar a sugerida por MARGEM_OVERRIDE
     % ======================================================================
     linha = pegar_linha(Q, estado_atual, NUM_ACOES);
     visitas = linha(NUM_ACOES + 1);
@@ -264,8 +281,17 @@ function [inputs, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
         acao_atual = randi(NUM_ACOES);
     else
         valores = linha(1:NUM_ACOES);
-        melhores = find(valores == max(valores));
-        acao_atual = melhores(randi(numel(melhores)));   % desempate aleatorio
+        melhor_valor = max(valores);
+        margem = MARGEM_OVERRIDE * max(1, abs(melhor_valor));
+
+        if valores(sugestao) >= melhor_valor - margem
+            % A acao sugerida e boa o bastante: fica com o controlador
+            acao_atual = sugestao;
+            seguiu_controlador = true;
+        else
+            melhores = find(valores == melhor_valor);
+            acao_atual = melhores(randi(numel(melhores)));   % desempate aleatorio
+        end
     end
 
     linha(NUM_ACOES + 1) = visitas + 1;
@@ -275,11 +301,14 @@ function [inputs, Fx, Fy] = HQlearn(mx, my, sprite_atual_mario, mapa, bx, by, bv
     % Executa a acao escolhida
     % ======================================================================
     if seguiu_controlador
-        inputs = inputs_ctrl;   % usa a saida exata do controlador (mais fiel que a acao quantizada)
         Fx = Fx_ctrl;
         Fy = Fy_ctrl;
+    end
+
+    if seguiu_controlador && ~EXECUTAR_ACAO_QUANTIZADA
+        inputs = inputs_ctrl;   % saida crua do controlador
     else
-        inputs = acao_para_inputs(acao_atual);
+        inputs = acao_para_inputs(acao_atual);   % exatamente o que a tabela aprende
     end
 
     pulou_anterior         = (inputs(7) == 1);
@@ -371,7 +400,7 @@ function Q = carregar_Q(arquivo, num_acoes)
             for i = 1:length(dados.chaves)
                 Q(dados.chaves{i}) = dados.valores(i, :);
             end
-            disp('Tabela Q carregada de qlearn_tabela_v2.mat');
+            disp(['Tabela Q carregada de ' arquivo]);
         else
             disp('Tabela Q vazia ou em formato incompativel - comecando do zero.');
         end
