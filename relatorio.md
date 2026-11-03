@@ -15,7 +15,7 @@ A proposta é investigar se a utilização dessas sugestões pode auxiliar o apr
 
 # 2. Coleta e pré-processamento dos dados
 
-Como o projeto utiliza aprendizado por reforço, não foi necessário utilizar um conjunto de dados previamente coletado. Os dados são obtidos durante a própria execução do jogo, por meio de um sistema de visão computacional desenvolvido anteriormente pelo grupo.  
+Como o projeto utiliza aprendizado por reforço, não foi necessário utilizar um conjunto de dados previamente coletado. Os dados são obtidos durante a própria execução do jogo, por meio de um sistema de visão computacional.  
 Esse sistema identifica a posição do Mario, os obstáculos e os elementos do cenário. Também realiza o rastreamento dos objetos e estima suas trajetórias, permitindo antecipar possíveis situações de perigo.  
 As posições detectadas do Mario são filtradas utilizando um filtro de Kalman, reduzindo oscilações nas estimativas causadas por possíveis erros de detecção.  
 As informações obtidas são então processadas e transformadas em estados discretos, utilizados pelos algoritmos. Por exemplo, a posição do Mario em relação a uma escada é classificada como à esquerda, alinhada ou à direita. Os barris também são classificados de acordo com o nível de perigo que representam, considerando sua posição atual e trajetória prevista.  
@@ -63,5 +63,4 @@ O Q-Learning tradicional depende exclusivamente da exploração do ambiente para
 
 O desenvolvimento deste trabalho permitiu aplicar conceitos de aprendizado por reforço em um ambiente real de jogo, integrando visão computacional, rastreamento de objetos e tomada de decisões.  
 Foram desenvolvidas duas abordagens baseadas em Q-Learning: uma tradicional e outra que utiliza sugestões de um controlador heurístico. A comparação entre elas permite investigar como a utilização de conhecimento prévio pode influenciar o processo de aprendizado de um agente.  
-Durante o desenvolvimento, um dos principais desafios foi transformar as informações visuais do jogo em estados que pudessem ser utilizados pelo algoritmo, além de definir recompensas capazes de incentivar comportamentos desejáveis.  
-Como possíveis melhorias, destacam-se o ajuste dos parâmetros de aprendizado, o aprimoramento da representação dos estados e a realização de novos experimentos com diferentes configurações de orientação, buscando identificar a influência de cada componente no desempenho final.  
+Durante o desenvolvimento, um dos principais desafios foi definir parâmetros de aprendizado capazes de incentivar comportamentos desejáveis.  
