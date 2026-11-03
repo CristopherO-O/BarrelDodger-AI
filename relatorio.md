@@ -1,4 +1,5 @@
 # APRENDIZADO POR REFORÇO NO JOGO DONKEY KONG
+
 **Comparação entre Q-Learning tradicional e Q-Learning auxiliado por controlador heurístico**
 
 Integrantes: Alan Vale, Cristopher Resende, Rodrigo Rezende
@@ -50,7 +51,7 @@ Nesta seção, serão apresentados os resultados obtidos durante a execução da
 A comparação considera aspectos como a capacidade de alcançar o final da fase, a quantidade de mortes, o tempo necessário para completar o jogo e a evolução do comportamento durante o aprendizado.  
 O Q-Learning tradicional depende exclusivamente da exploração do ambiente para descobrir quais ações são mais vantajosas. Já a versão orientada possui acesso às recomendações do controlador, o que pode reduzir a quantidade de tentativas improdutivas, principalmente em estados pouco conhecidos.  
 
-| Métrica | Q-Learning puro | Qlearn com controlador heurístico |
+| Métrica | Q-Learning puro | Q-Learning com heurística |
 |---|---|---|
 | Partidas realizadas |  |  |
 | Vitórias |  |  |
