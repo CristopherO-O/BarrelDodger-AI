@@ -53,11 +53,13 @@ O Q-Learning tradicional depende exclusivamente da exploração do ambiente para
 
 | Métrica | Q-Learning puro | Q-Learning com heurística |
 |---|---|---|
-| Partidas realizadas |  |  |
-| Vitórias |  |  |
-| Taxa de vitória (%) |  |  |
-| Mortes |  |  |
-| Tempo médio por partida (s) |  |  |
+| Partidas realizadas | 342 | 347 |
+| Vitórias | 1 | 11 |
+| Taxa de vitória (%) | 0,29% | 3,17% |
+| Mortes | 341 | 336 |
+| Tempo médio por partida (s) | 4,48 | 4,72 |
+
+Os dados coletados revelaram que o auxílio da heurística causou um pequeno aumento na taxa de vitória.
 
 # 6. Conclusão
 
