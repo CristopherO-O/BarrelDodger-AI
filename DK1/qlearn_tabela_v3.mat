@@ -1,0 +1,292 @@
+# Created by Octave 11.3.0, Mon Nov 02 21:17:29 2026 -03
+# name: chaves
+# type: cell
+# rows: 1
+# columns: 31
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 14
+-1|0|0|0|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 14
+-1|0|0|0|0|0|3
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 14
+-1|0|0|0|0|0|8
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 15
+-1|0|1|-1|0|0|3
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 15
+-1|0|2|-1|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 14
+-1|1|0|0|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 14
+-1|1|0|0|0|0|3
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 15
+-1|1|1|-1|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 15
+-1|1|2|-1|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 15
+-1|1|2|-1|0|0|7
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 15
+-1|1|2|-1|0|0|8
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+0|0|0|0|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+0|0|0|0|0|0|3
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+0|0|0|0|0|0|4
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+0|0|0|0|0|0|8
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 14
+0|0|2|-1|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+0|1|0|0|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 14
+0|1|2|-1|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|0|0|0|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|0|0|0|0|0|4
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|0|0|0|0|0|8
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 14
+1|0|0|0|1|-1|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|0|0|0|1|1|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|0|1|1|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|0|1|1|0|0|4
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|0|2|1|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|0|2|1|0|0|6
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|1|0|0|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|1|0|0|0|0|4
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|1|1|1|0|0|1
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+1|1|2|1|0|0|1
+
+
+
+
+
+# name: valores
+# type: matrix
+# rows: 31
+# columns: 9
+ 22.215272671469251 1.822537317973822 4.410473484867997 2.0518759322797071 0 0 0 0 88
+ 11.56502421872597 12.57356809073473 27.073248769169975 11.284928601789266 9.7862601096003914 8.9405792560106718 6.8741257306064787 11.486653880889698 735
+ 0 0 0 0 0 0 0 8.5826411785184575 5
+ 0 0 2.5834324244199034 0 0 0 0 0 6
+ 5.6873661372321003 0 0 0 0 0 0 0 3
+ 18.298239045841527 2.0608143956739506 1.3561458273057077 3.4321506370373438 0 1.8250132799481014 0.54536050108025547 3.0965848259247277 97
+ 0 0 -99.766798680243028 0 0 0 0 0 2
+ 2.8615480478472359 0 0 0 0 0 0 0 4
+ 0.11975475592442808 0 0 0 0 0 0 0 3
+ 0 0 0 0 0 0 -0.28302489868568942 0 1
+ 0 0 0 0 0 0 0 0.63208240501109447 1
+ 4.7910852071994929 0 0 -0.030402590113368433 0 -1.1476451695379637 0 0 48
+ 0 0 4.3247799702374543 0 0 0 0 0 9
+ 0 0.47056905031495938 0 4.2326300141016127 0 0 0 0 10
+ 0 0 0 0 0 0 0 1.5325043810987942 2
+ 0.22015108612050815 0 0 0 0 0 0 0 1
+ 29.868108490233993 0.58257230020048523 1.1480638160104057 2.5496074282863521 0 2.2135487506392724 0 4.6075417546042567 115
+ 4.4064703760020674 0 0 0 0 0 0 0 4
+ 14.371936365787928 0 1.3160333598969987 -0.059951296046468518 0 0.64323299935721912 0 1.4825533983840395 79
+ 20.397340798688631 18.80660202568345 18.573221351064976 -70.907961583910023 21.329462752721117 15.454990936894049 22.254619473658053 19.742904544807047 1426
+ 0 0 0 0 0 0 0 22.553713124763998 9
+ -90.505492744222025 0 0 0 0 0 0 0 2
+ 8.6388140876134596 0 0 0 0 0 0 0 1
+ 8.8214878300631607 0 0 0 0 0 0 0 9
+ 0 0 0 5.8559865667496824 0 0 0 0 9
+ 7.2415675731952893 0 0 0 0 0 0 0 9
+ 0 1.9729044650755494 0 0 0 28.286741230929355 0 0 12
+ 30.164770528735087 0 2.7680203886276527 0 0.90340190706787693 0 0 2.7949707528830268 73
+ -0.29277576170549208 0.64697842840400477 0.49204225517216832 11.699606971127022 0 0.13075006379072476 0 0.33076850980632688 22
+ 6.5390948394885857 0 0 0 0 0 0 0 9
+ 3.4835873957560044 0 0 0 0 0 0 0 2
+
+

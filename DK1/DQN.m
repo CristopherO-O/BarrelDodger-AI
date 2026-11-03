@@ -10,7 +10,18 @@
 %   - em vez de tabela Q, uma MLP  (N_ENTRADA -> 64 -> 64 -> 8)
 %   - estado CONTINUO (posicoes normalizadas, barris mais proximos, etc.)
 %   - replay buffer + target network + Adam + perda de Huber
-%   - o controlador continua guiando (p_guia decai) e dando bonus de imitacao
+%
+% COMO O CONTROLADOR ENTRA NO DQN (igual ao HQlearn)
+%   O controlador roda TODO frame e recomenda uma acao. Essa recomendacao:
+%     1) faz parte do ESTADO (vetor one-hot das 8 acoes), entao a rede
+%        "enxerga" o que o controlador faria;
+%     2) quando seguida, e executada e guardada no replay buffer como acao
+%        da propria rede (mesmo estado, mesma acao executada), entao ela
+%        aprende como se a decisao tivesse sido dela;
+%     3) tem peso grande na escolha: a rede so contraria o controlador
+%        quando o buffer ja esta cheio E o Q da melhor acao supera o Q da
+%        acao sugerida por MARGEM_OVERRIDE;
+%     4) rende uma recompensa de imitacao que decai devagar com o tempo.
 %
 % Dependencias: controlador_mario.m (o mesmo que o HQlearn usa).
 
@@ -32,11 +43,16 @@ function [inputs, Fx, Fy] = DQN(mx, my, sprite_atual_mario, mapa, bx, by, bvx, b
     TARGET_A_CADA  = 500;    % passos de treino
     REWARD_SCALE   = 0.01;
 
-    % --- Guia do controlador ---
-    P_GUIA_INI        = 0.8;
-    P_GUIA_MIN        = 0.1;
-    P_GUIA_DECAIMENTO = 0.99997;
-    BONUS_IMITACAO    = 1;
+    % --- Dependencia do controlador (mesmos valores do HQlearn) ---
+    P_GUIA_INI        = 0.9;      % chance de seguir o controlador no comeco
+    P_GUIA_MIN        = 0.5;      % chance minima (0 pra avaliar so a rede)
+    P_GUIA_DECAIMENTO = 0.99999;  % por frame (~59k frames ate chegar no minimo)
+    BONUS_IMITACAO    = 5;        % recompensa por concordar com o controlador (decai com p_guia)
+    MARGEM_OVERRIDE   = 0.2;      % a rede so contraria o controlador se o Q da melhor acao
+                                  % superar o Q da sugerida por 20% do valor (relativo)
+    MARGEM_PISO       = 0.1;      % piso da margem, ja na escala do Q (recompensa * REWARD_SCALE)
+    EXECUTAR_ACAO_QUANTIZADA = true;  % executa exatamente a acao 1..8 que foi guardada
+                                      % (false = usa a saida crua do controlador)
 
     % --- Exploracao ---
     EPS_INICIAL    = 0.10;
@@ -161,7 +177,8 @@ function [inputs, Fx, Fy] = DQN(mx, my, sprite_atual_mario, mapa, bx, by, bvx, b
     sugestao = inputs_para_acao(inputs_ctrl);
 
     % ======================================================================
-    % Estado atual (vetor continuo, coluna)
+    % Estado atual (vetor continuo, coluna). A sugestao do controlador
+    % entra como one-hot no final do vetor.
     % ======================================================================
     [escada_bin, ~] = avaliar_escada(mx, my, mapa, TOL_ALTURA_ESCADA, TOL_ALINHAMENTO);
     [perigo_barril_bin, dir_barril_bin] = avaliar_perigo_barril(mx, my, bx, by, bpx, bpy, DIST_BARRIL_X, DIST_BARRIL_Y, HORIZONTE_PREVISAO);
@@ -182,6 +199,8 @@ function [inputs, Fx, Fy] = DQN(mx, my, sprite_atual_mario, mapa, bx, by, bvx, b
     if ~isempty(s_anterior)
         recompensa = 0;
 
+        % Bonus de imitacao: concordar com o controlador vale um pouco,
+        % mas decai conforme a rede deixa de depender dele.
         if acao_anterior == sugestao_anterior
             recompensa = recompensa + BONUS_IMITACAO * (p_guia / P_GUIA_INI);
         end
@@ -215,6 +234,8 @@ function [inputs, Fx, Fy] = DQN(mx, my, sprite_atual_mario, mapa, bx, by, bvx, b
             recompensa = recompensa + RECOMPENSA_VITORIA;
         end
 
+        % Guarda a transicao de qualquer acao executada, inclusive as
+        % sugeridas pelo controlador: a rede aprende como se tivesse escolhido.
         [buffer, buf_i, buf_n] = guardar(buffer, buf_i, buf_n, BUFFER_TAM, ...
             s_anterior, acao_anterior, recompensa * REWARD_SCALE, s_atual, venceu);
 
@@ -244,7 +265,8 @@ function [inputs, Fx, Fy] = DQN(mx, my, sprite_atual_mario, mapa, bx, by, bvx, b
     % Escolha da acao
     %   1) buffer ainda pequeno ou sorteio < p_guia -> controlador
     %   2) sorteio seguinte < eps                    -> aleatoria
-    %   3) senao                                     -> argmax Q(s)
+    %   3) senao argmax Q(s), MAS so contraria o controlador se a melhor
+    %      acao superar a sugerida por MARGEM_OVERRIDE
     % ======================================================================
     r = rand();
     seguiu_controlador = false;
@@ -256,16 +278,31 @@ function [inputs, Fx, Fy] = DQN(mx, my, sprite_atual_mario, mapa, bx, by, bvx, b
         acao_atual = randi(NUM_ACOES);
     else
         q = forward(rede, s_atual);
-        melhores = find(q == max(q));
-        acao_atual = melhores(randi(numel(melhores)));
+        melhor_valor = max(q);
+        margem = MARGEM_OVERRIDE * max(MARGEM_PISO, abs(melhor_valor));
+
+        if q(sugestao) >= melhor_valor - margem
+            % A acao sugerida e boa o bastante: fica com o controlador
+            acao_atual = sugestao;
+            seguiu_controlador = true;
+        else
+            melhores = find(q == melhor_valor);
+            acao_atual = melhores(randi(numel(melhores)));
+        end
     end
 
+    % ======================================================================
+    % Executa a acao escolhida
+    % ======================================================================
     if seguiu_controlador
-        inputs = inputs_ctrl;
         Fx = Fx_ctrl;
         Fy = Fy_ctrl;
+    end
+
+    if seguiu_controlador && ~EXECUTAR_ACAO_QUANTIZADA
+        inputs = inputs_ctrl;   % saida crua do controlador
     else
-        inputs = acao_para_inputs(acao_atual);
+        inputs = acao_para_inputs(acao_atual);   % exatamente o que vai pro buffer
     end
 
     pulou_anterior         = (inputs(7) == 1);
